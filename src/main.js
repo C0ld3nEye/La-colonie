@@ -1,7 +1,7 @@
 /**
  * La Colonie - Les Premiers Feux
  * Point d'entrée principal du jeu
- * 
+ *
  * Architecture :
  * - Simulation tick découplée du rendu (60 FPS rendu, 10 ticks/s simulation)
  * - Structure : systems/ entities/ ui/ data/
@@ -22,21 +22,21 @@ const config = {
         default: 'arcade',
         arcade: {
             gravity: { y: 0 },
-            debug: false
-        }
+            debug: false,
+        },
     },
     scale: {
         mode: Phaser.Scale.RESIZE,
-        autoCenter: Phaser.Scale.CENTER_BOTH
+        autoCenter: Phaser.Scale.CENTER_BOTH,
     },
     render: {
         antialias: false,
-        pixelArt: true
+        pixelArt: true,
     },
     // S'assurer que le canvas est créé même si le parent n'existe pas
     dom: {
-        createContainer: true
-    }
+        createContainer: true,
+    },
 };
 
 // Initialisation du jeu

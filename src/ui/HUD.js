@@ -1,6 +1,6 @@
 /**
  * HUD - Interface utilisateur du jeu
- * 
+ *
  * Caractéristiques :
  * - Bandeau en haut : date/saison/météo + vitesse
  * - Boutons principaux en bas
@@ -12,7 +12,7 @@ export class HUD {
         this.scene = scene;
         this.timeSystem = timeSystem;
         this.gameState = gameState;
-        
+
         // Éléments UI
         this.dateText = null;
         this.speedText = null;
@@ -22,7 +22,7 @@ export class HUD {
         this.loadButton = null;
         this.menuButton = null;
         this.notifications = [];
-        
+
         // Configuration
         this.buttonSize = 44; // Taille minimale pour le tactile
         this.padding = 10;
@@ -43,7 +43,7 @@ export class HUD {
     createTopBar() {
         const camera = this.scene.cameras.main;
         const barHeight = 50;
-        
+
         // Fond semi-transparent
         const bg = this.scene.add.rectangle(
             camera.centerX,
@@ -51,11 +51,11 @@ export class HUD {
             camera.width,
             barHeight,
             this.uiColor,
-            0.8
+            0.8,
         );
         bg.setOrigin(0.5);
         bg.setDepth(100);
-        
+
         // Texte de date
         this.dateText = this.scene.add.text(
             camera.centerX,
@@ -64,12 +64,12 @@ export class HUD {
             {
                 font: '16px Arial',
                 fill: `#${this.textColor.toString(16).padStart(6, '0')}`,
-                align: 'center'
-            }
+                align: 'center',
+            },
         );
         this.dateText.setOrigin(0.5);
         this.dateText.setDepth(101);
-        
+
         // Indicateur de vitesse
         this.speedText = this.scene.add.text(
             camera.width - 100,
@@ -78,8 +78,8 @@ export class HUD {
             {
                 font: '20px Arial',
                 fill: `#${this.textColor.toString(16).padStart(6, '0')}`,
-                fontWeight: 'bold'
-            }
+                fontWeight: 'bold',
+            },
         );
         this.speedText.setOrigin(0.5);
         this.speedText.setDepth(101);
@@ -92,7 +92,7 @@ export class HUD {
         const camera = this.scene.cameras.main;
         const barHeight = 60;
         const buttonSpacing = 10;
-        
+
         // Fond semi-transparent
         const bg = this.scene.add.rectangle(
             camera.centerX,
@@ -100,56 +100,56 @@ export class HUD {
             camera.width,
             barHeight,
             this.uiColor,
-            0.8
+            0.8,
         );
         bg.setOrigin(0.5);
         bg.setDepth(100);
-        
+
         // Bouton Pause/Play
         this.pauseButton = this.createButton(
             camera.centerX - 150,
             camera.height - barHeight / 2,
             '⏸️',
-            () => this.onPauseClick()
+            () => this.onPauseClick(),
         );
-        
+
         // Boutons de vitesse
         this.speedButtons[0] = this.createButton(
             camera.centerX - 70,
             camera.height - barHeight / 2,
             '1×',
-            () => this.onSpeedClick(1)
+            () => this.onSpeedClick(1),
         );
-        
+
         this.speedButtons[1] = this.createButton(
             camera.centerX + 10,
             camera.height - barHeight / 2,
             '3×',
-            () => this.onSpeedClick(3)
+            () => this.onSpeedClick(3),
         );
-        
+
         // Bouton Sauvegarder
         this.saveButton = this.createButton(
             camera.centerX + 90,
             camera.height - barHeight / 2,
             '💾',
-            () => this.onSaveClick()
+            () => this.onSaveClick(),
         );
-        
+
         // Bouton Charger
         this.loadButton = this.createButton(
             camera.centerX + 170,
             camera.height - barHeight / 2,
             '📂',
-            () => this.onLoadClick()
+            () => this.onLoadClick(),
         );
-        
+
         // Bouton Menu
         this.menuButton = this.createButton(
             camera.width - 50,
             camera.height - barHeight / 2,
             '⏏️',
-            () => this.onMenuClick()
+            () => this.onMenuClick(),
         );
     }
 
@@ -158,40 +158,40 @@ export class HUD {
      */
     createButton(x, y, text, callback) {
         const size = this.buttonSize;
-        
+
         // Fond du bouton
         const button = this.scene.add.rectangle(x, y, size, size, this.uiColor);
         button.setOrigin(0.5);
         button.setStrokeStyle(2, this.uiBorderColor);
         button.setDepth(101);
         button.setInteractive();
-        
+
         // Texte du bouton
         const textObj = this.scene.add.text(x, y, text, {
             font: '20px Arial',
-            fill: `#${this.textColor.toString(16).padStart(6, '0')}`
+            fill: `#${this.textColor.toString(16).padStart(6, '0')}`,
         });
         textObj.setOrigin(0.5);
         textObj.setDepth(102);
-        
+
         // Animation au survol/tap
         button.on('pointerover', () => {
             button.setFillStyle(0x3a2e22);
         });
-        
+
         button.on('pointerout', () => {
             button.setFillStyle(this.uiColor);
         });
-        
+
         button.on('pointerdown', () => {
             button.setScale(0.95);
         });
-        
+
         button.on('pointerup', () => {
             button.setScale(1);
             callback();
         });
-        
+
         return button;
     }
 
@@ -202,7 +202,7 @@ export class HUD {
         const camera = this.scene.cameras.main;
         const width = 200;
         const height = camera.height - 120;
-        
+
         // Zone des notifications (à gauche)
         const zone = this.scene.add.rectangle(
             width / 2,
@@ -210,7 +210,7 @@ export class HUD {
             width,
             height,
             0x000000,
-            0.3
+            0.3,
         );
         zone.setOrigin(0.5);
         zone.setDepth(99);
@@ -223,12 +223,12 @@ export class HUD {
         if (this.dateText) {
             this.dateText.setText(time.formatDate());
         }
-        
+
         if (this.speedText) {
             const speedText = speed === 0 ? '⏸️' : `×${speed}`;
             this.speedText.setText(speedText);
         }
-        
+
         // Mettre à jour l'apparence des boutons de vitesse
         this.speedButtons.forEach((button, index) => {
             const targetSpeed = index === 0 ? 1 : 3;
@@ -319,13 +319,13 @@ export class HUD {
             info: 0x8ac4ff,
             success: 0x00ff00,
             warning: 0xffaa00,
-            error: 0xff0000
+            error: 0xff0000,
         };
-        
+
         const color = colors[type] || colors.info;
         const startY = camera.height - 200;
         const endY = camera.height - 150;
-        
+
         // Créer la notification
         const bg = this.scene.add.rectangle(
             camera.centerX,
@@ -333,11 +333,11 @@ export class HUD {
             200,
             40,
             color,
-            0.8
+            0.8,
         );
         bg.setOrigin(0.5);
         bg.setDepth(102);
-        
+
         const text = this.scene.add.text(
             camera.centerX,
             startY,
@@ -345,20 +345,20 @@ export class HUD {
             {
                 font: '16px Arial',
                 fill: '#000',
-                align: 'center'
-            }
+                align: 'center',
+            },
         );
         text.setOrigin(0.5);
         text.setDepth(103);
-        
+
         // Animation
         this.scene.tweens.add({
             targets: [bg, text],
             y: endY,
             duration: 300,
-            ease: 'Back.easeOut'
+            ease: 'Back.easeOut',
         });
-        
+
         // Suppression après délai
         this.scene.time.delayedCall(2000, () => {
             this.scene.tweens.add({
@@ -368,7 +368,7 @@ export class HUD {
                 onComplete: () => {
                     bg.destroy();
                     text.destroy();
-                }
+                },
             });
         });
     }

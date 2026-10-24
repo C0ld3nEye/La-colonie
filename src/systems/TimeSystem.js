@@ -1,6 +1,6 @@
 /**
  * TimeSystem - Système de gestion du temps découplé
- * 
+ *
  * Caractéristiques :
  * - Temps qui s'écoule indépendamment du rendu
  * - Vitesse réglable : pause, 1x, 3x
@@ -16,13 +16,13 @@ export class TimeSystem {
         this.time = {
             day: 1,
             season: 0, // 0 = printemps, 1 = été, 2 = automne, 3 = hiver
-            year: 1
+            year: 1,
         };
         this.speed = 1; // 0 = pause, 1 = 1x, 3 = 3x
         this.lastUpdate = 0;
         this.accumulator = 0;
         this.tickInterval = GAME_CONFIG.TICK_INTERVAL; // 1 seconde par tick
-        
+
         // Noms des saisons
         this.seasonNames = GAME_CONFIG.SEASON_NAMES;
     }
@@ -34,13 +34,13 @@ export class TimeSystem {
     update(delta, gameSpeed) {
         // Mettre à jour la vitesse
         this.speed = gameSpeed || this.speed;
-        
+
         // Si en pause, ne rien faire
         if (this.speed === 0) return;
-        
+
         // Accumuler le temps
         this.accumulator += delta * this.speed;
-        
+
         // Exécuter des ticks tant qu'on a assez de temps accumulé
         while (this.accumulator >= this.tickInterval) {
             this.tick();
@@ -53,7 +53,7 @@ export class TimeSystem {
      */
     tick() {
         this.advanceTime();
-        
+
         // Déclencher des événements si nécessaire
         this.checkTimeEvents();
     }
@@ -63,12 +63,12 @@ export class TimeSystem {
      */
     advanceTime() {
         this.time.day++;
-        
+
         // Changer de saison si nécessaire
         if (this.time.day > GAME_CONFIG.DAYS_PER_SEASON) {
             this.time.day = 1;
             this.time.season++;
-            
+
             if (this.time.season >= GAME_CONFIG.SEASONS_PER_YEAR) {
                 this.time.season = 0;
                 this.time.year++;
@@ -106,7 +106,7 @@ export class TimeSystem {
     getCurrentTime() {
         return {
             ...this.time,
-            seasonName: this.seasonNames[this.time.season]
+            seasonName: this.seasonNames[this.time.season],
         };
     }
 

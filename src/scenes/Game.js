@@ -13,23 +13,23 @@ import { GAME_CONFIG } from '../data/config.js';
 export class Game extends Phaser.Scene {
     constructor() {
         super({ key: 'Game' });
-        
+
         // Systèmes
         this.worldMap = null;
         this.timeSystem = null;
         this.cameraController = null;
         this.hud = null;
         this.saveSystem = null;
-        
+
         // État
         this.gameState = {
             map: null,
             time: {
                 day: 1,
                 season: 0,
-                year: 1
+                year: 1,
             },
-            speed: 1 // 0 = pause, 1 = 1x, 3 = 3x
+            speed: 1, // 0 = pause, 1 = 1x, 3 = 3x
         };
     }
 
@@ -40,25 +40,25 @@ export class Game extends Phaser.Scene {
     create() {
         // Initialisation des systèmes
         this.initSystems();
-        
+
         // Création de la carte
         this.createMap();
-        
+
         // Configuration de la caméra
         this.setupCamera();
-        
+
         // Création du HUD
         this.createHUD();
-        
+
         // Système de sauvegarde
         this.saveSystem = new SaveSystem(this);
-        
+
         // Chargement de la sauvegarde si elle existe
         this.loadGame();
-        
+
         // Contrôles tactiles
         this.setupInput();
-        
+
         // Gestion du resize
         this.scene.scale.on('resize', this.handleResize, this);
     }
@@ -66,7 +66,7 @@ export class Game extends Phaser.Scene {
     initSystems() {
         // Système de temps découplé
         this.timeSystem = new TimeSystem(this);
-        
+
         // Contrôleur de caméra
         this.cameraController = new CameraController(this);
     }
@@ -75,7 +75,7 @@ export class Game extends Phaser.Scene {
         this.worldMap = new WorldMap(this, GAME_CONFIG.MAP_WIDTH, GAME_CONFIG.MAP_HEIGHT);
         this.worldMap.generate();
         this.worldMap.render();
-        
+
         // Stocker l'état de la carte
         this.gameState.map = this.worldMap.getState();
     }
@@ -88,7 +88,7 @@ export class Game extends Phaser.Scene {
         camera.setZoom(GAME_CONFIG.DEFAULT_ZOOM);
         camera.centerOn(
             (GAME_CONFIG.MAP_WIDTH / 2) * GAME_CONFIG.TILE_SIZE,
-            (GAME_CONFIG.MAP_HEIGHT / 2) * GAME_CONFIG.TILE_SIZE
+            (GAME_CONFIG.MAP_HEIGHT / 2) * GAME_CONFIG.TILE_SIZE,
         );
     }
 
@@ -100,29 +100,29 @@ export class Game extends Phaser.Scene {
     setupInput() {
         // Contrôles tactiles pour la caméra
         this.cameraController.setupInput();
-        
+
         // Boutons de vitesse
         this.hud.setupSpeedControls((speed) => {
             this.gameState.speed = speed;
             this.timeSystem.setSpeed(speed);
         });
-        
+
         // Bouton pause
         this.hud.setupPauseControl(() => {
             this.gameState.speed = this.gameState.speed === 0 ? 1 : 0;
             this.timeSystem.setSpeed(this.gameState.speed);
         });
-        
+
         // Bouton sauvegarder
         this.hud.setupSaveControl(() => {
             this.saveSystem.save(this.getGameState());
         });
-        
+
         // Bouton charger
         this.hud.setupLoadControl(() => {
             this.loadGame();
         });
-        
+
         // Bouton retourner au menu
         this.hud.setupMenuControl(() => {
             this.saveSystem.save(this.getGameState());
@@ -137,11 +137,11 @@ export class Game extends Phaser.Scene {
             this.timeSystem.setTime(
                 savedState.time.day,
                 savedState.time.season,
-                savedState.time.year
+                savedState.time.year,
             );
             this.timeSystem.setSpeed(savedState.speed || 1);
             this.gameState.speed = savedState.speed || 1;
-            
+
             // Re-générer la carte à partir de l'état sauvegardé
             if (savedState.map) {
                 this.worldMap.generateFromState(savedState.map);
@@ -153,7 +153,7 @@ export class Game extends Phaser.Scene {
     handleResize() {
         // Reconfigurer la caméra après resize
         this.setupCamera();
-        
+
         // Mettre à jour le HUD
         if (this.hud) {
             this.hud.resize(this.cameras.main.width, this.cameras.main.height);
@@ -165,17 +165,17 @@ export class Game extends Phaser.Scene {
         if (this.timeSystem) {
             this.timeSystem.update(delta, this.gameState.speed);
         }
-        
+
         // Mise à jour de la caméra
         if (this.cameraController) {
             this.cameraController.update();
         }
-        
+
         // Mise à jour du HUD
         if (this.hud) {
             this.hud.update(
                 this.timeSystem.getCurrentTime(),
-                this.gameState.speed
+                this.gameState.speed,
             );
         }
     }
@@ -184,7 +184,7 @@ export class Game extends Phaser.Scene {
         return {
             ...this.gameState,
             map: this.worldMap.getState(),
-            time: this.timeSystem.getCurrentTime()
+            time: this.timeSystem.getCurrentTime(),
         };
     }
 }

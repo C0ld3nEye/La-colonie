@@ -1,6 +1,6 @@
 /**
  * SaveSystem - Système de sauvegarde et chargement
- * 
+ *
  * Caractéristiques :
  * - Sauvegarde dans localStorage
  * - Export/import via JSON

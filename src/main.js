@@ -32,6 +32,10 @@ const config = {
     render: {
         antialias: false,
         pixelArt: true
+    },
+    // S'assurer que le canvas est créé même si le parent n'existe pas
+    dom: {
+        createContainer: true
     }
 };
 

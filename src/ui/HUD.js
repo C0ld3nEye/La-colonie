@@ -219,9 +219,9 @@ export class HUD {
     /**
      * Met à jour le HUD
      */
-    update(time, speed) {
-        if (this.dateText) {
-            this.dateText.setText(time.formatDate());
+    update(timeObj, speed) {
+        if (this.dateText && this.timeSystem) {
+            this.dateText.setText(this.timeSystem.formatDate());
         }
 
         if (this.speedText) {

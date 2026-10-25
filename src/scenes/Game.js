@@ -174,10 +174,7 @@ export class Game extends Phaser.Scene {
 
         // Mise à jour du HUD
         if (this.hud) {
-            this.hud.update(
-                this.timeSystem.getCurrentTime(),
-                this.gameState.speed,
-            );
+            this.hud.update(this.timeSystem, this.gameState.speed);
         }
     }
 

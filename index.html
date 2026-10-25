@@ -38,6 +38,7 @@
             color: white;
             text-align: center;
             font-size: 20px;
+            z-index: 1000;
         }
     </style>
 </head>
@@ -47,7 +48,9 @@
         Chargement du jeu...<br>
         <small>Si rien ne s'affiche, vérifiez la console (F12)</small>
     </div>
-    <script type="module" src="/src/main.js"></script>
+    <script type="module">
+        import '/src/main.js';
+    </script>
     <script>
         // Masquer le fallback quand Phaser est chargé
         window.addEventListener('load', () => {

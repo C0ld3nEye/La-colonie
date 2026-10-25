@@ -3,6 +3,7 @@
  * Affichage du titre et bouton pour démarrer
  */
 
+import Phaser from 'phaser';
 import { PALETTE } from '../systems/graphics.js';
 
 export class TitleScene extends Phaser.Scene {

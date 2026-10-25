@@ -3,6 +3,7 @@
  * Gère la carte, le temps, la caméra et les contrôles
  */
 
+import Phaser from 'phaser';
 import { WorldMap } from '../systems/WorldMap.js';
 import { TimeSystem } from '../systems/TimeSystem.js';
 import { CameraController } from '../systems/CameraController.js';

@@ -15,9 +15,16 @@ export default defineConfig({
         assetsDir: 'assets',
         rollupOptions: {
             output: {
-                manualChunks: undefined,
-                inlineDynamicImports: true
+                manualChunks: {
+                    phaser: ['phaser']
+                },
+                inlineDynamicImports: false
             }
-        }
+        },
+        chunkSizeWarningLimit: 1000
+    },
+    optimizeDeps: {
+        include: ['phaser'],
+        exclude: []
     }
 });

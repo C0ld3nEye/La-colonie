@@ -42,9 +42,19 @@ const config = {
 // Initialisation du jeu
 const game = new Phaser.Game(config);
 
+// Masquer le fallback quand le jeu est prêt
+document.addEventListener('DOMContentLoaded', () => {
+    const fallback = document.getElementById('fallback');
+    if (fallback) {
+        fallback.style.display = 'none';
+    }
+});
+
 // Gestion du resize
 window.addEventListener('resize', () => {
-    game.scale.resize(window.innerWidth, window.innerHeight);
+    if (game.scale) {
+        game.scale.resize(window.innerWidth, window.innerHeight);
+    }
 });
 
 // Export pour tests

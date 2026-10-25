@@ -32,8 +32,10 @@ export class TimeSystem {
      * delta = temps écoulé en ms depuis le dernier update
      */
     update(delta, gameSpeed) {
-        // Mettre à jour la vitesse
-        this.speed = gameSpeed || this.speed;
+        // Mettre à jour la vitesse (0 = pause, valeur explicitement transmise)
+        if (gameSpeed !== undefined && gameSpeed !== null) {
+            this.speed = gameSpeed;
+        }
 
         // Si en pause, ne rien faire
         if (this.speed === 0) return;

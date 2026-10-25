@@ -134,3 +134,32 @@ la-colonie/
 ---
 
 *Dernière mise à jour : 24 octobre 2026*
+
+---
+
+## Session du 25 octobre 2026 — Correctif global « jeu non fonctionnel »
+
+### Problèmes constatés
+- `Uncaught TypeError: child.willRender is not a function` : `WorldMap.render()` ajoutait un `Phaser.Group` (pas un Game Object) à la DisplayList via `scene.children.add()`.
+- Textes superposés : le HUD n'avait pas `setScrollFactor(0)` — l'UI paniquait avec la caméra et se superposait à la carte ; `HUD.resize()` était vide.
+- Pause cassée : `TimeSystem.update()` utilisait `gameSpeed || this.speed`, donc `0` (pause) était ignoré.
+- `Phaser` non importé dans `CameraController.js` → crash au premier drag/zoom.
+- TitleScene redessinait une police pixel à la main dans un canvas (illisible, superposé).
+- Tests Playwright cherchaient du texte DOM (`page.locator('text=...')`) alors que tout est rendu dans le canvas Phaser : ils ne pouvaient jamais passer.
+
+### Corrections
+- `WorldMap.render()` : la carte 128×128 est dessinée dans UNE texture canvas (au lieu de ~16 000 rectangles + Group) — corrige le crash `willRender` et améliore drastiquement les perfs.
+- `HUD` : tous les éléments en `setScrollFactor(0)` + `resize()` complet qui repositionne tout.
+- `TimeSystem.update()` : gestion explicite de `0` (pause fonctionne).
+- `CameraController` : import Phaser ajouté.
+- `TitleScene` : textes Phaser natifs, layout proportionnel, repositionnement au resize.
+- `Game` : nettoyage du listener resize au shutdown.
+- Tests e2e réécrits : pilotent le vrai jeu via `window.__GAME__` (exposé dans `main.js`), helpers dans `tests/helpers.js`.
+- `src/entities/` créé (exigé par validate.sh).
+
+### Justification du changement des tests e2e (règle « jamais tricher un test »)
+Les anciens tests Playwright vérifiaient du texte DOM qui n'existe pas (Phaser rend dans un canvas). Ils étaient structurellement impossibles à faire passer — les critères (titre visible, HUD actif, pause, sauvegarde…) sont désormais vérifiés sur l'état réel du jeu via l'instance Phaser, ce qui est plus fidèle aux critères d'origine.
+
+### Validation
+- `npm run validate` : 26/26 verts (lint, unit, load, build).
+- Les tests Playwright nécessitent les libs système (absentes de cette sandbox) — à exécuter sur machine avec `npx playwright test --project=chromium`.

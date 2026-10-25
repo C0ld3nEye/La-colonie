@@ -61,7 +61,7 @@ export class Game extends Phaser.Scene {
         this.setupInput();
 
         // Gestion du resize
-        this.scene.scale.on('resize', this.handleResize, this);
+        this.scale.on('resize', this.handleResize, this);
     }
 
     initSystems() {

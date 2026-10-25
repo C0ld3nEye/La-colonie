@@ -32,8 +32,8 @@ export class TitleScene extends Phaser.Scene {
     createTitle() {
         // Créer un canvas pour le titre
         const canvas = document.createElement('canvas');
-        canvas.width = 300;
-        canvas.height = 100;
+        canvas.width = 400;
+        canvas.height = 120;
         const ctx = canvas.getContext('2d');
 
         // Palette de couleurs préhistoriques
@@ -46,8 +46,9 @@ export class TitleScene extends Phaser.Scene {
         };
 
         // Dessiner le titre
-        this.drawPixelText(ctx, 'LA COLONIE', 20, 15, palette, 2);
-        this.drawPixelText(ctx, 'LES PREMIERS FEUX', 20, 50, palette, 1.5);
+        this.drawPixelText(ctx, 'LA COLONIE', 50, 30, palette, 2.5);
+        this.drawPixelText(ctx, 'LES PREMIERS', 50, 70, palette, 2);
+        this.drawPixelText(ctx, 'FEUX', 50, 100, palette, 2.5);
 
         // Ajouter le canvas comme texture
         const texture = this.textures.addCanvas('title-logo', canvas);
@@ -55,20 +56,21 @@ export class TitleScene extends Phaser.Scene {
         // Afficher la texture
         const sprite = this.add.sprite(
             this.cameras.main.centerX,
-            100,
+            this.cameras.main.centerY - 50,
             'title-logo'
         );
         sprite.setOrigin(0.5);
-        sprite.setScale(0.8);
     }
 
     drawPixelText(ctx, text, x, y, palette, scale = 1) {
         const pixelSize = 4 * scale;
+        const charWidth = 8 * scale;
+        const charHeight = 8 * scale;
         const spacing = 2 * scale;
 
         for (let i = 0; i < text.length; i++) {
             const char = text[i];
-            const charX = x + i * (8 * scale + spacing);
+            const charX = x + i * (charWidth + spacing);
 
             // Dessiner chaque caractère en pixel art
             this.drawCharacter(ctx, char, charX, y, pixelSize, palette);
@@ -205,14 +207,14 @@ export class TitleScene extends Phaser.Scene {
 
     createStartButton() {
         const centerX = this.cameras.main.centerX;
-        const centerY = this.cameras.main.centerY + 80;
+        const centerY = this.cameras.main.centerY + 100;
 
         // Créer le bouton
         const button = this.add.rectangle(
             centerX,
             centerY,
-            200,
-            60,
+            250,
+            70,
             0x5a3e2b
         );
         button.setOrigin(0.5);
@@ -225,7 +227,7 @@ export class TitleScene extends Phaser.Scene {
             centerY,
             'COMMENCER',
             {
-                font: '24px Arial',
+                font: '28px Arial',
                 fill: '#ffffff',
                 fontWeight: 'bold'
             }
@@ -250,14 +252,14 @@ export class TitleScene extends Phaser.Scene {
 
     createInstructions() {
         const centerX = this.cameras.main.centerX;
-        const centerY = this.cameras.main.height - 50;
+        const centerY = this.cameras.main.height - 40;
 
         const text = this.add.text(
             centerX,
             centerY,
             'Appuyez pour naviguer  |  Pincez pour zoomer',
             {
-                font: '14px Arial',
+                font: '16px Arial',
                 fill: '#c4a882'
             }
         );

@@ -202,148 +202,111 @@ export class WorldMap {
      * Rendu de la carte
      */
     render() {
-        // Créer ou mettre à jour le layer
+        // Dessiner toute la carte dans un seul canvas puis l'afficher comme image
+        // (un seul Game Object au lieu de ~16 000, et aucun Group ajouté à la DisplayList)
         if (this.layer) {
             this.layer.destroy();
         }
 
-        this.layer = this.scene.make.group();
+        if (this.scene.textures.exists('world-map')) {
+            this.scene.textures.remove('world-map');
+        }
 
-        // Dessiner chaque tuile
+        const canvas = this.scene.textures.createCanvas(
+            'world-map',
+            this.width * this.tileSize,
+            this.height * this.tileSize,
+        );
+        const ctx = canvas.context;
+
         for (let y = 0; y < this.height; y++) {
             for (let x = 0; x < this.width; x++) {
                 const terrainType = this.grid[y][x];
                 const color = this.terrainColors[terrainType] || 0xffffff;
 
-                // Créer un sprite pour chaque tuile
-                const tile = this.scene.add.rectangle(
-                    x * this.tileSize + this.tileSize / 2,
-                    y * this.tileSize + this.tileSize / 2,
+                ctx.fillStyle = `#${color.toString(16).padStart(6, '0')}`;
+                ctx.fillRect(
+                    x * this.tileSize,
+                    y * this.tileSize,
                     this.tileSize,
                     this.tileSize,
-                    color,
                 );
-                tile.setOrigin(0.5);
-                tile.setStrokeStyle(1, 0x000000, 0.3);
 
-                // Ajouter des détails selon le biome
-                this.addTerrainDetails(tile, x, y, terrainType);
-
-                this.layer.add(tile);
+                this.addTerrainDetails(ctx, x, y, terrainType);
             }
         }
 
-        // Ajouter le layer à la scène
-        this.scene.children.add(this.layer);
+        canvas.refresh();
+
+        this.layer = this.scene.add.image(
+            (this.width * this.tileSize) / 2,
+            (this.height * this.tileSize) / 2,
+            'world-map',
+        );
+        this.layer.setOrigin(0.5);
+        this.layer.setDepth(0);
     }
 
     /**
-     * Ajoute des détails visuels aux tuiles
+     * Ajoute des détails visuels aux tuiles (dessinés dans le canvas de la carte)
      */
-    addTerrainDetails(tile, x, y, terrainType) {
+    addTerrainDetails(ctx, x, y, terrainType) {
+        const tileSize = this.tileSize;
+        const originX = x * tileSize;
+        const originY = y * tileSize;
+
+        const rand = (min, max) => min + Math.random() * (max - min);
+
         switch (terrainType) {
         case this.terrainTypes.GRASS:
-            // Herbe avec quelques fleurs
-            if (Math.random() < 0.1) {
-                this.addGrassDetail(tile.x, tile.y);
+            if (Math.random() < 0.08) {
+                ctx.fillStyle = Math.random() < 0.5 ? '#ffd700' : '#ff00ff';
+                ctx.fillRect(originX + rand(3, 11), originY + rand(3, 11), 2, 2);
             }
             break;
         case this.terrainTypes.FOREST:
-            // Arbres
             if (Math.random() < 0.3) {
-                this.addTreeDetail(tile.x, tile.y);
+                const treeHeight = rand(8, 14);
+                const trunkWidth = rand(2, 4);
+                const trunkX = originX + tileSize / 2 - trunkWidth / 2;
+
+                ctx.fillStyle = '#3a2c1a';
+                ctx.fillRect(
+                    trunkX,
+                    originY + tileSize - treeHeight,
+                    trunkWidth,
+                    treeHeight,
+                );
+
+                ctx.fillStyle = '#1a3c2a';
+                const leafSize = rand(6, 10);
+                ctx.fillRect(
+                    originX + tileSize / 2 - leafSize / 2,
+                    originY + tileSize - treeHeight - leafSize / 2,
+                    leafSize,
+                    leafSize,
+                );
             }
             break;
         case this.terrainTypes.WATER:
-            // Reflets
-            if (Math.random() < 0.2) {
-                this.addWaterDetail(tile.x, tile.y);
+            if (Math.random() < 0.15) {
+                ctx.fillStyle = '#8ac4ff';
+                ctx.fillRect(originX + rand(2, 8), originY + rand(4, 10), rand(3, 6), 1);
             }
             break;
         case this.terrainTypes.STONE:
-            // Rochers
-            if (Math.random() < 0.2) {
-                this.addStoneDetail(tile.x, tile.y);
+            if (Math.random() < 0.15) {
+                const size = rand(3, 6);
+                ctx.fillStyle = '#4a4a4a';
+                ctx.fillRect(
+                    originX + rand(2, 10),
+                    originY + rand(2, 10),
+                    size,
+                    size,
+                );
             }
             break;
         }
-    }
-
-    /**
-     * Ajoute un détail d'herbe
-     */
-    addGrassDetail(x, y) {
-        const detail = this.scene.add.rectangle(
-            x + (Math.random() - 0.5) * 8,
-            y + (Math.random() - 0.5) * 8,
-            2 + Math.random() * 4,
-            2 + Math.random() * 4,
-            0xff00ff, // Rose pour les fleurs
-        );
-        detail.setOrigin(0.5);
-        this.layer.add(detail);
-    }
-
-    /**
-     * Ajoute un détail d'arbre
-     */
-    addTreeDetail(x, y) {
-        const height = 8 + Math.random() * 8;
-        const width = 4 + Math.random() * 4;
-
-        // Tronc
-        const trunk = this.scene.add.rectangle(
-            x,
-            y - height / 2,
-            width,
-            height,
-            0x3a2c1a, // Brun foncé
-        );
-        trunk.setOrigin(0.5, 1);
-
-        // Feuillage
-        const leaves = this.scene.add.circle(
-            x,
-            y - height,
-            width * 2,
-            0x2a5c3a, // Vert foncé
-        );
-
-        this.layer.add(trunk);
-        this.layer.add(leaves);
-    }
-
-    /**
-     * Ajoute un détail d'eau
-     */
-    addWaterDetail(x, y) {
-        const detail = this.scene.add.rectangle(
-            x + (Math.random() - 0.5) * 12,
-            y + (Math.random() - 0.5) * 12,
-            3 + Math.random() * 6,
-            1 + Math.random() * 3,
-            0x8ac4ff, // Bleu clair pour les reflets
-        );
-        detail.setOrigin(0.5);
-        detail.setAngle(Math.random() * 180);
-        this.layer.add(detail);
-    }
-
-    /**
-     * Ajoute un détail de pierre
-     */
-    addStoneDetail(x, y) {
-        const size = 4 + Math.random() * 6;
-        const detail = this.scene.add.rectangle(
-            x + (Math.random() - 0.5) * 10,
-            y + (Math.random() - 0.5) * 10,
-            size,
-            size,
-            0x4a4a4a, // Gris
-        );
-        detail.setOrigin(0.5);
-        detail.setStrokeStyle(1, 0x000000);
-        this.layer.add(detail);
     }
 
     /**

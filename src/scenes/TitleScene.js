@@ -1,299 +1,88 @@
 /**
- * Scène de titre minimal
- * Affichage du titre et bouton pour démarrer
+ * Scène de titre
+ * Titre, sous-titre, bouton COMMENCER et instructions, avec texte Phaser natif
+ * (plus de superposition : chaque élément a sa propre ligne, repositionnés au resize)
  */
 
 import Phaser from 'phaser';
-import { PALETTE } from '../systems/graphics.js';
 
 export class TitleScene extends Phaser.Scene {
     constructor() {
         super({ key: 'TitleScene' });
     }
 
-    preload() {
-        // Rien à preloader - tout est généré par code
-    }
-
     create() {
-        // Fond sombre
         this.cameras.main.setBackgroundColor('#1a120b');
 
-        // Générer et afficher le titre
-        this.createTitle();
+        this.titleText = this.add
+            .text(0, 0, 'LA COLONIE', {
+                font: 'bold 48px Arial',
+                fill: '#c4a882',
+            })
+            .setOrigin(0.5);
 
-        // Bouton démarrer
-        this.createStartButton();
-
-        // Instructions tactiles
-        this.createInstructions();
-    }
-
-    createTitle() {
-        // Créer un canvas pour le titre
-        const canvas = document.createElement('canvas');
-        canvas.width = 400;
-        canvas.height = 150;
-        const ctx = canvas.getContext('2d');
-
-        // Palette de couleurs préhistoriques
-        const palette = {
-            brown: '#5a3e2b',
-            beige: '#c4a882',
-            orange: '#d4652b',
-            red: '#8b2613',
-            yellow: '#ffd700',
-        };
-
-        // Dessiner le titre sur 3 lignes bien espacées
-        this.drawPixelText(ctx, 'LA COLONIE', 50, 30, palette, 2.5);
-        this.drawPixelText(ctx, 'LES PREMIERS', 50, 75, palette, 2);
-        this.drawPixelText(ctx, 'FEUX', 50, 110, palette, 2.5);
-
-        // Ajouter le canvas comme texture
-        const texture = this.textures.addCanvas('title-logo', canvas);
-
-        // Afficher la texture
-        const sprite = this.add.sprite(
-            this.cameras.main.centerX,
-            this.cameras.main.centerY - 80,
-            'title-logo',
-        );
-        sprite.setOrigin(0.5);
-    }
-
-    drawPixelText(ctx, text, x, y, palette, scale = 1) {
-        const pixelSize = 4 * scale;
-        const charWidth = 8 * scale;
-        const charHeight = 8 * scale;
-        const spacing = 4 * scale; // Espacement plus large entre caractères
-
-        for (let i = 0; i < text.length; i++) {
-            const char = text[i];
-            const charX = x + i * (charWidth + spacing);
-
-            // Dessiner chaque caractère en pixel art
-            this.drawCharacter(ctx, char, charX, y, pixelSize, palette);
-        }
-    }
-
-    drawCharacter(ctx, char, x, y, pixelSize, palette) {
-        // Définitions des caractères en pixel art 8x8
-        const font = {
-            'L': [
-                [1, 1, 1, 0, 0, 0, 0, 0],
-                [1, 0, 0, 0, 0, 0, 0, 0],
-                [1, 0, 0, 0, 0, 0, 0, 0],
-                [1, 0, 0, 0, 0, 0, 0, 0],
-                [1, 0, 0, 0, 0, 0, 0, 0],
-                [1, 0, 0, 0, 0, 0, 0, 0],
-                [1, 1, 1, 1, 1, 1, 1, 1],
-            ],
-            'A': [
-                [0, 1, 1, 0, 0, 0, 0, 0],
-                [1, 0, 0, 1, 0, 0, 0, 0],
-                [1, 0, 0, 1, 0, 0, 0, 0],
-                [1, 1, 1, 1, 0, 0, 0, 0],
-                [1, 0, 0, 1, 0, 0, 0, 0],
-                [1, 0, 0, 1, 0, 0, 0, 0],
-                [1, 0, 0, 1, 0, 0, 0, 0],
-            ],
-            'C': [
-                [0, 1, 1, 1, 0, 0, 0, 0],
-                [1, 0, 0, 0, 0, 0, 0, 0],
-                [1, 0, 0, 0, 0, 0, 0, 0],
-                [1, 0, 0, 0, 0, 0, 0, 0],
-                [1, 0, 0, 0, 0, 0, 0, 0],
-                [1, 0, 0, 0, 0, 0, 0, 0],
-                [0, 1, 1, 1, 0, 0, 0, 0],
-            ],
-            'O': [
-                [0, 1, 1, 0, 0, 0, 0, 0],
-                [1, 0, 0, 1, 0, 0, 0, 0],
-                [1, 0, 0, 1, 0, 0, 0, 0],
-                [1, 0, 0, 1, 0, 0, 0, 0],
-                [1, 0, 0, 1, 0, 0, 0, 0],
-                [1, 0, 0, 1, 0, 0, 0, 0],
-                [0, 1, 1, 0, 0, 0, 0, 0],
-            ],
-            'N': [
-                [1, 0, 0, 1, 0, 0, 0, 0],
-                [1, 1, 0, 1, 0, 0, 0, 0],
-                [1, 0, 1, 1, 0, 0, 0, 0],
-                [1, 0, 0, 1, 0, 0, 0, 0],
-                [1, 0, 0, 1, 0, 0, 0, 0],
-                [1, 0, 0, 1, 0, 0, 0, 0],
-                [1, 0, 0, 1, 0, 0, 0, 0],
-            ],
-            'I': [
-                [1, 1, 1, 0, 0, 0, 0, 0],
-                [0, 1, 0, 0, 0, 0, 0, 0],
-                [0, 1, 0, 0, 0, 0, 0, 0],
-                [0, 1, 0, 0, 0, 0, 0, 0],
-                [0, 1, 0, 0, 0, 0, 0, 0],
-                [0, 1, 0, 0, 0, 0, 0, 0],
-                [1, 1, 1, 0, 0, 0, 0, 0],
-            ],
-            'E': [
-                [1, 1, 1, 1, 0, 0, 0, 0],
-                [1, 0, 0, 0, 0, 0, 0, 0],
-                [1, 0, 0, 0, 0, 0, 0, 0],
-                [1, 1, 1, 0, 0, 0, 0, 0],
-                [1, 0, 0, 0, 0, 0, 0, 0],
-                [1, 0, 0, 0, 0, 0, 0, 0],
-                [1, 1, 1, 1, 0, 0, 0, 0],
-            ],
-            'S': [
-                [0, 1, 1, 1, 0, 0, 0, 0],
-                [1, 0, 0, 0, 0, 0, 0, 0],
-                [1, 0, 0, 0, 0, 0, 0, 0],
-                [0, 1, 1, 0, 0, 0, 0, 0],
-                [0, 0, 0, 1, 0, 0, 0, 0],
-                [1, 0, 0, 1, 0, 0, 0, 0],
-                [0, 1, 1, 0, 0, 0, 0, 0],
-            ],
-            'P': [
-                [1, 1, 1, 0, 0, 0, 0, 0],
-                [1, 0, 0, 1, 0, 0, 0, 0],
-                [1, 0, 0, 1, 0, 0, 0, 0],
-                [1, 1, 1, 0, 0, 0, 0, 0],
-                [1, 0, 0, 0, 0, 0, 0, 0],
-                [1, 0, 0, 0, 0, 0, 0, 0],
-                [1, 0, 0, 0, 0, 0, 0, 0],
-            ],
-            'R': [
-                [1, 1, 1, 0, 0, 0, 0, 0],
-                [1, 0, 0, 1, 0, 0, 0, 0],
-                [1, 0, 0, 1, 0, 0, 0, 0],
-                [1, 1, 1, 0, 0, 0, 0, 0],
-                [1, 0, 1, 0, 0, 0, 0, 0],
-                [1, 0, 0, 1, 0, 0, 0, 0],
-                [1, 0, 0, 1, 0, 0, 0, 0],
-            ],
-            'U': [
-                [1, 0, 0, 1, 0, 0, 0, 0],
-                [1, 0, 0, 1, 0, 0, 0, 0],
-                [1, 0, 0, 1, 0, 0, 0, 0],
-                [1, 0, 0, 1, 0, 0, 0, 0],
-                [1, 0, 0, 1, 0, 0, 0, 0],
-                [1, 0, 0, 1, 0, 0, 0, 0],
-                [0, 1, 1, 0, 0, 0, 0, 0],
-            ],
-            'F': [
-                [1, 1, 1, 1, 0, 0, 0, 0],
-                [1, 0, 0, 0, 0, 0, 0, 0],
-                [1, 0, 0, 0, 0, 0, 0, 0],
-                [1, 1, 1, 0, 0, 0, 0, 0],
-                [1, 0, 0, 0, 0, 0, 0, 0],
-                [1, 0, 0, 0, 0, 0, 0, 0],
-                [1, 0, 0, 0, 0, 0, 0, 0],
-            ],
-            'X': [
-                [1, 0, 0, 1, 0, 0, 0, 0],
-                [0, 1, 0, 1, 0, 0, 0, 0],
-                [0, 0, 1, 1, 0, 0, 0, 0],
-                [0, 0, 1, 1, 0, 0, 0, 0],
-                [0, 1, 0, 1, 0, 0, 0, 0],
-                [1, 0, 0, 1, 0, 0, 0, 0],
-                [1, 0, 0, 1, 0, 0, 0, 0],
-            ],
-            ' ': [
-                [0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0],
-            ],
-            '-': [
-                [0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0],
-                [1, 1, 1, 1, 1, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0],
-            ],
-        };
-
-        // Si le caractère n'est pas dans la font, utiliser un carré
-        const charDef = font[char] || font['O'];
-
-        for (let row = 0; row < charDef.length; row++) {
-            for (let col = 0; col < charDef[row].length; col++) {
-                if (charDef[row][col] === 1) {
-                    ctx.fillStyle = palette.beige;
-                    ctx.fillRect(
-                        x + col * pixelSize,
-                        y + row * pixelSize,
-                        pixelSize,
-                        pixelSize,
-                    );
-                }
-            }
-        }
-    }
-
-    createStartButton() {
-        const centerX = this.cameras.main.centerX;
-        const centerY = this.cameras.main.centerY + 100;
-
-        // Créer le bouton
-        const button = this.add.rectangle(
-            centerX,
-            centerY,
-            250,
-            70,
-            0x5a3e2b,
-        );
-        button.setOrigin(0.5);
-        button.setStrokeStyle(3, 0xc4a882);
-        button.setInteractive();
-
-        // Texte du bouton
-        const text = this.add.text(
-            centerX,
-            centerY,
-            'COMMENCER',
-            {
+        this.subtitleText = this.add
+            .text(0, 0, 'LES PREMIERS FEUX', {
                 font: '28px Arial',
+                fill: '#d4652b',
+            })
+            .setOrigin(0.5);
+
+        this.descriptionText = this.add
+            .text(0, 0, 'Un jeu de gestion préhistorique', {
+                font: '18px Arial',
+                fill: '#8a7a5a',
+            })
+            .setOrigin(0.5);
+
+        this.startButton = this.add
+            .rectangle(0, 0, 250, 70, 0x5a3e2b)
+            .setOrigin(0.5)
+            .setStrokeStyle(3, 0xc4a882)
+            .setInteractive();
+
+        this.startText = this.add
+            .text(0, 0, 'COMMENCER', {
+                font: 'bold 28px Arial',
                 fill: '#ffffff',
-                fontWeight: 'bold',
-            },
-        );
-        text.setOrigin(0.5);
+            })
+            .setOrigin(0.5);
 
-        // Effets hover
-        button.on('pointerover', () => {
-            button.setFillStyle(0x6d4c38);
-        });
-        button.on('pointerout', () => {
-            button.setFillStyle(0x5a3e2b);
-        });
-        button.on('pointerdown', () => {
-            button.setScale(0.95);
-        });
-        button.on('pointerup', () => {
-            button.setScale(1);
-            this.startGame();
-        });
-    }
-
-    createInstructions() {
-        const centerX = this.cameras.main.centerX;
-        const centerY = this.cameras.main.height - 40;
-
-        const text = this.add.text(
-            centerX,
-            centerY,
-            'Appuyez pour naviguer  |  Pincez pour zoomer',
-            {
+        this.instructionsText = this.add
+            .text(0, 0, 'Appuyez pour naviguer  |  Pincez pour zoomer', {
                 font: '16px Arial',
                 fill: '#c4a882',
-            },
-        );
-        text.setOrigin(0.5);
+            })
+            .setOrigin(0.5);
+
+        this.startButton.on('pointerover', () => {
+            this.startButton.setFillStyle(0x6d4c38);
+        });
+        this.startButton.on('pointerout', () => {
+            this.startButton.setFillStyle(0x5a3e2b);
+        });
+        this.startButton.on('pointerdown', () => {
+            this.startButton.setScale(0.95);
+        });
+        this.startButton.on('pointerup', () => {
+            this.startButton.setScale(1);
+            this.startGame();
+        });
+
+        this.scale.on('resize', this.layout, this);
+        this.layout();
+    }
+
+    layout() {
+        const { width, height } = this.scale;
+        const centerX = width / 2;
+
+        this.titleText.setPosition(centerX, height * 0.25);
+        this.subtitleText.setPosition(centerX, height * 0.25 + 60);
+        this.descriptionText.setPosition(centerX, height * 0.25 + 110);
+        this.startButton.setPosition(centerX, height * 0.55);
+        this.startText.setPosition(centerX, height * 0.55);
+        this.instructionsText.setPosition(centerX, height - 40);
     }
 
     startGame() {

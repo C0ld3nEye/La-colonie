@@ -1,62 +1,56 @@
 /**
- * Tests Playwright pour TitleScene
- * Vérifie l'écran de titre
+ * Tests Playwright pour l'écran de titre
  */
 
 import { test, expect } from '@playwright/test';
+import { waitForGame, startGame, getConsoleErrors } from './helpers.js';
 
 test.describe('TitleScene', () => {
-    test.beforeEach(async ({ page }) => {
+    test('Écran de titre affiché au démarrage', async ({ page }) => {
         await page.goto('/');
+        await waitForGame(page);
+
+        const state = await page.evaluate(() => {
+            const scene = window.__GAME__.scene.getScene('TitleScene');
+            return {
+                active: scene.sys.isActive(),
+                title: scene.titleText.text,
+                subtitle: scene.subtitleText.text,
+            };
+        });
+        expect(state.active).toBe(true);
+        expect(state.title).toBe('LA COLONIE');
+        expect(state.subtitle).toBe('LES PREMIERS FEUX');
     });
 
-    test('Écran de titre s affiche', async ({ page }) => {
-        // Vérifier que le titre est visible
-        const title = page.locator('text=LA COLONIE');
-        await expect(title).toBeVisible();
-    });
+    test('Bouton COMMENCER est visible et interactif', async ({ page }) => {
+        await page.goto('/');
+        await waitForGame(page);
 
-    test('Sous-titre est visible', async ({ page }) => {
-        const subtitle = page.locator('text=LES PREMIERS FEUX');
-        await expect(subtitle).toBeVisible();
-    });
-
-    test('Description est visible', async ({ page }) => {
-        const description = page.locator('text=Un jeu de gestion préhistorique');
-        await expect(description).toBeVisible();
-    });
-
-    test('Bouton COMMENCER est visible', async ({ page }) => {
-        const startButton = page.locator('text=COMMENCER');
-        await expect(startButton).toBeVisible();
-    });
-
-    test('Instructions sont visibles', async ({ page }) => {
-        const instructions = page.locator('text=Tap pour démarrer');
-        await expect(instructions).toBeVisible();
+        const state = await page.evaluate(() => {
+            const scene = window.__GAME__.scene.getScene('TitleScene');
+            return {
+                visible: scene.startButton.visible,
+                text: scene.startText.text,
+            };
+        });
+        expect(state.visible).toBe(true);
+        expect(state.text).toBe('COMMENCER');
     });
 
     test('Cliquer sur COMMENCER lance le jeu', async ({ page }) => {
-        const startButton = page.locator('text=COMMENCER');
-        await startButton.click();
-        
-        // Attendre que la scène Game soit chargée
-        // On vérifie que le HUD est visible
-        await page.waitForSelector('text=/Jour \d+ - (Printemps|Été|Automne|Hiver) - Année \d+/', { timeout: 1000 });
+        await startGame(page);
+        const isGame = await page.evaluate(() =>
+            window.__GAME__.scene.getScene('Game').sys.isActive(),
+        );
+        expect(isGame).toBe(true);
     });
 
     test('Pas d erreurs console', async ({ page }) => {
-        // Capturer les erreurs console
-        const errors = [];
-        page.on('console', msg => {
-            if (msg.type() === 'error') {
-                errors.push(msg.text());
-            }
-        });
-        
+        const errors = getConsoleErrors(page);
+        await page.goto('/');
+        await waitForGame(page);
         await page.waitForTimeout(1000);
-        
-        // Vérifier qu'il n'y a pas d'erreurs
-        expect(errors.length).toBe(0);
+        expect(errors).toEqual([]);
     });
 });

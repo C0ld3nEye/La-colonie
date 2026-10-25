@@ -9,6 +9,7 @@
  */
 
 import { GAME_CONFIG } from '../data/config.js';
+import Phaser from 'phaser';
 
 export class CameraController {
     constructor(scene) {

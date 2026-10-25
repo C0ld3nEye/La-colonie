@@ -62,6 +62,9 @@ export class Game extends Phaser.Scene {
 
         // Gestion du resize
         this.scale.on('resize', this.handleResize, this);
+
+        // Nettoyage au changement de scène
+        this.events.once('shutdown', this.handleShutdown, this);
     }
 
     initSystems() {
@@ -149,6 +152,10 @@ export class Game extends Phaser.Scene {
                 this.worldMap.render();
             }
         }
+    }
+
+    handleShutdown() {
+        this.scale.off('resize', this.handleResize, this);
     }
 
     handleResize() {

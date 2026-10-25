@@ -42,6 +42,11 @@ const config = {
 // Initialisation du jeu
 const game = new Phaser.Game(config);
 
+// Exposé pour les tests Playwright (les textes sont dans le canvas, pas dans le DOM)
+if (typeof window !== 'undefined') {
+    window.__GAME__ = game;
+}
+
 // Masquer le fallback quand le jeu est prêt
 document.addEventListener('DOMContentLoaded', () => {
     const fallback = document.getElementById('fallback');

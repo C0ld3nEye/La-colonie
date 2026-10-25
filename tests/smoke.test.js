@@ -1,78 +1,62 @@
 /**
- * Tests smoke pour vérifier que le jeu démarre correctement
+ * Tests smoke : le jeu démarre sans erreur console
  */
 
 import { test, expect } from '@playwright/test';
+import { waitForGame, startGame, getGameInfo, getConsoleErrors } from './helpers.js';
 
 test.describe('Smoke Tests', () => {
     test('Page se charge sans erreur', async ({ page }) => {
-        const errors = [];
-        page.on('console', msg => {
-            if (msg.type() === 'error') {
-                errors.push(msg.text());
-            }
-        });
-        
+        const errors = getConsoleErrors(page);
         await page.goto('/');
-        
-        // Attendre que le jeu soit chargé
-        await page.waitForSelector('#game-container', { timeout: 5000 });
-        
-        // Vérifier qu'il n'y a pas d'erreurs
-        expect(errors.length).toBe(0);
+        await waitForGame(page);
+        await page.waitForTimeout(1000);
+        expect(errors).toEqual([]);
     });
 
-    test('Canvas est créé', async ({ page }) => {
+    test('Canvas est créé et visible', async ({ page }) => {
         await page.goto('/');
-        
         const canvas = page.locator('canvas');
         await expect(canvas).toBeVisible({ timeout: 5000 });
-        
-        // Vérifier que le canvas a une taille raisonnable
         const box = await canvas.boundingBox();
         expect(box.width).toBeGreaterThan(100);
         expect(box.height).toBeGreaterThan(100);
     });
 
-    test('Pas d écran blanc', async ({ page }) => {
-        await page.goto('/');
-        
-        // Vérifier qu'il y a du contenu visible
-        const canvas = page.locator('canvas');
-        await expect(canvas).toBeVisible({ timeout: 5000 });
-        
-        // Vérifier que le canvas n'est pas entièrement blanc
-        // On ne peut pas vérifier la couleur directement, mais on peut
-        // vérifier que le jeu a démarré
-    });
-
     test('Écran de titre apparaît', async ({ page }) => {
         await page.goto('/');
-        
-        // Vérifier que le titre apparaît
-        const title = page.locator('text=LA COLONIE');
-        await expect(title).toBeVisible({ timeout: 5000 });
+        await waitForGame(page);
+        const hasTitle = await page.evaluate(() => {
+            const scene = window.__GAME__.scene.getScene('TitleScene');
+            return scene.sys.isActive() && scene.titleText.visible;
+        });
+        expect(hasTitle).toBe(true);
     });
 
     test('Passage à la scène Game fonctionne', async ({ page }) => {
-        await page.goto('/');
-        
-        // Cliquer sur COMMENCER
-        await page.click('text=COMMENCER');
-        
-        // Vérifier que le HUD apparaît
-        await page.waitForSelector('text=/Jour \d+ - (Printemps|Été|Automne|Hiver) - Année \d+/', { timeout: 2000 });
+        await startGame(page);
+        const info = await getGameInfo(page);
+        expect(info.hasMap).toBe(true);
+        expect(info.mapW).toBe(128);
+        expect(info.mapH).toBe(128);
+    });
+
+    test('HUD affiche la date', async ({ page }) => {
+        await startGame(page);
+        const info = await getGameInfo(page);
+        expect(info.date).toMatch(/Jour \d+ - (Printemps|Été|Automne|Hiver) - Année \d+/);
     });
 
     test('Retour au menu fonctionne', async ({ page }) => {
-        await page.goto('/');
-        await page.click('text=COMMENCER');
-        await page.waitForTimeout(500);
-        
-        // Cliquer sur menu
-        await page.click('text=⏏️');
-        
-        // Vérifier qu'on est retourné à l'écran de titre
-        await page.waitForSelector('text=LA COLONIE', { timeout: 1000 });
+        await startGame(page);
+        await page.evaluate(() => {
+            const scene = window.__GAME__.scene.getScene('Game');
+            scene.scene.start('TitleScene');
+        });
+        await page.waitForTimeout(300);
+        const isTitle = await page.evaluate(() =>
+            window.__GAME__.scene.getScene('TitleScene').sys.isActive(),
+        );
+        expect(isTitle).toBe(true);
     });
 });

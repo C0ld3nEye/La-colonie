@@ -12,15 +12,14 @@ export class TitleScene extends Phaser.Scene {
     }
 
     preload() {
-        // Génération des sprites par code
-        this.generateTitleAssets();
+        // Rien à preloader - tout est généré par code
     }
 
     create() {
         // Fond sombre
         this.cameras.main.setBackgroundColor('#1a120b');
 
-        // Titre généré par code
+        // Générer et afficher le titre
         this.createTitle();
 
         // Bouton démarrer
@@ -30,26 +29,37 @@ export class TitleScene extends Phaser.Scene {
         this.createInstructions();
     }
 
-    generateTitleAssets() {
-        // Créer texture pour le titre
-        const titleTexture = this.textures.add('title-logo', 0, 0, 200, 80);
-        const titleCanvas = titleTexture.getSourceImage();
-        const ctx = titleCanvas.getContext('2d');
+    createTitle() {
+        // Créer un canvas pour le titre
+        const canvas = document.createElement('canvas');
+        canvas.width = 300;
+        canvas.height = 100;
+        const ctx = canvas.getContext('2d');
 
         // Palette de couleurs préhistoriques
         const palette = {
-            brown: 0x5a3e2b,
-            beige: 0xc4a882,
-            orange: 0xd4652b,
-            red: 0x8b2613,
-            yellow: 0xffd700,
+            brown: '#5a3e2b',
+            beige: '#c4a882',
+            orange: '#d4652b',
+            red: '#8b2613',
+            yellow: '#ffd700',
         };
 
-        // Dessiner "LA COLONIE" en pixel art
-        this.drawPixelText(ctx, 'LA COLONIE', 10, 10, palette);
-        this.drawPixelText(ctx, 'LES PREMIERS FEUX', 10, 40, palette, 0.7);
+        // Dessiner le titre
+        this.drawPixelText(ctx, 'LA COLONIE', 20, 15, palette, 2);
+        this.drawPixelText(ctx, 'LES PREMIERS FEUX', 20, 50, palette, 1.5);
 
-        titleTexture.refresh();
+        // Ajouter le canvas comme texture
+        const texture = this.textures.addCanvas('title-logo', canvas);
+
+        // Afficher la texture
+        const sprite = this.add.sprite(
+            this.cameras.main.centerX,
+            100,
+            'title-logo'
+        );
+        sprite.setOrigin(0.5);
+        sprite.setScale(0.8);
     }
 
     drawPixelText(ctx, text, x, y, palette, scale = 1) {
@@ -153,10 +163,10 @@ export class TitleScene extends Phaser.Scene {
                 [1,0,0,0,0,0,0,0],
                 [1,0,0,0,0,0,0,0]],
             'X': [[1,0,0,1,0,0,0,0],
-                [1,0,0,1,0,0,0,0],
-                [0,1,1,0,0,0,0,0],
-                [0,1,1,0,0,0,0,0],
-                [1,0,0,1,0,0,0,0],
+                [0,1,0,1,0,0,0,0],
+                [0,0,1,1,0,0,0,0],
+                [0,0,1,1,0,0,0,0],
+                [0,1,0,1,0,0,0,0],
                 [1,0,0,1,0,0,0,0],
                 [1,0,0,1,0,0,0,0]],
             ' ': [[0,0,0,0,0,0,0,0],
@@ -169,109 +179,92 @@ export class TitleScene extends Phaser.Scene {
             '-': [[0,0,0,0,0,0,0,0],
                 [0,0,0,0,0,0,0,0],
                 [0,0,0,0,0,0,0,0],
-                [1,1,1,1,0,0,0,0],
+                [1,1,1,1,1,0,0,0],
                 [0,0,0,0,0,0,0,0],
                 [0,0,0,0,0,0,0,0],
                 [0,0,0,0,0,0,0,0]],
         };
 
-        const def = font[char.toUpperCase()] || font[' '];
+        // Si le caractère n'est pas dans la font, utiliser un carré
+        const charDef = font[char] || font['O'];
 
-        for (let row = 0; row < def.length; row++) {
-            for (let col = 0; col < def[row].length; col++) {
-                if (def[row][col]) {
-                    ctx.fillStyle = `#${palette.orange.toString(16).padStart(6, '0')}`;
+        for (let row = 0; row < charDef.length; row++) {
+            for (let col = 0; col < charDef[row].length; col++) {
+                if (charDef[row][col] === 1) {
+                    ctx.fillStyle = palette.beige;
                     ctx.fillRect(
                         x + col * pixelSize,
                         y + row * pixelSize,
                         pixelSize,
-                        pixelSize,
+                        pixelSize
                     );
                 }
             }
         }
     }
 
-    createTitle() {
-        // Logo du jeu
-        const logo = this.add.image(
-            this.cameras.main.centerX,
-            this.cameras.main.centerY - 100,
-            'title-logo',
-        );
-        logo.setScale(2);
-        logo.setOrigin(0.5);
-
-        // Sous-titre
-        this.add.text(
-            this.cameras.main.centerX,
-            this.cameras.main.centerY + 50,
-            'Un jeu de gestion préhistorique',
-            {
-                font: '20px Arial',
-                fill: '#c4a882',
-                align: 'center',
-            },
-        ).setOrigin(0.5);
-    }
-
     createStartButton() {
-        // Bouton démarrer avec style préhistorique
+        const centerX = this.cameras.main.centerX;
+        const centerY = this.cameras.main.centerY + 80;
+
+        // Créer le bouton
         const button = this.add.rectangle(
-            this.cameras.main.centerX,
-            this.cameras.main.centerY + 150,
+            centerX,
+            centerY,
             200,
             60,
-            0x5a3e2b,
+            0x5a3e2b
         );
         button.setOrigin(0.5);
-        button.setStrokeStyle(2, 0xd4652b);
+        button.setStrokeStyle(3, 0xc4a882);
+        button.setInteractive();
 
+        // Texte du bouton
         const text = this.add.text(
-            this.cameras.main.centerX,
-            this.cameras.main.centerY + 150,
+            centerX,
+            centerY,
             'COMMENCER',
             {
                 font: '24px Arial',
-                fill: '#ffd700',
-                fontWeight: 'bold',
-            },
+                fill: '#ffffff',
+                fontWeight: 'bold'
+            }
         );
         text.setOrigin(0.5);
 
-        // Interaction tactile
-        button.setInteractive();
+        // Effets hover
+        button.on('pointerover', () => {
+            button.setFillStyle(0x6d4c38);
+        });
+        button.on('pointerout', () => {
+            button.setFillStyle(0x5a3e2b);
+        });
         button.on('pointerdown', () => {
-            this.tweens.add({
-                targets: button,
-                scale: 0.95,
-                duration: 50,
-                yoyo: true,
-            });
+            button.setScale(0.95);
         });
-
         button.on('pointerup', () => {
-            this.scene.start('Game');
-        });
-
-        // Permettre le tap sur le texte aussi
-        text.setInteractive();
-        text.on('pointerup', () => {
-            this.scene.start('Game');
+            button.setScale(1);
+            this.startGame();
         });
     }
 
     createInstructions() {
-        const instructions = this.add.text(
-            this.cameras.main.centerX,
-            this.cameras.main.height - 50,
-            'Tap pour démarrer - Pincez pour zoomer',
+        const centerX = this.cameras.main.centerX;
+        const centerY = this.cameras.main.height - 50;
+
+        const text = this.add.text(
+            centerX,
+            centerY,
+            'Appuyez pour naviguer  |  Pincez pour zoomer',
             {
                 font: '14px Arial',
-                fill: '#8b2613',
-                align: 'center',
-            },
+                fill: '#c4a882'
+            }
         );
-        instructions.setOrigin(0.5);
+        text.setOrigin(0.5);
+    }
+
+    startGame() {
+        this.scene.start('Game');
     }
 }

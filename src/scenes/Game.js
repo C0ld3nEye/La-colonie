@@ -94,11 +94,24 @@ export class Game extends Phaser.Scene {
             (GAME_CONFIG.MAP_WIDTH / 2) * GAME_CONFIG.TILE_SIZE,
             (GAME_CONFIG.MAP_HEIGHT / 2) * GAME_CONFIG.TILE_SIZE,
         );
+
+        // Caméra dédiée à l'UI : setScrollFactor(0) ne neutralise pas le zoom
+        // en Phaser, donc avec la caméra principale à zoom 2 le HUD était
+        // rendu hors écran. L'UI vit sur sa propre caméra à zoom 1.
+        this.uiCamera = this.cameras.add(0, 0, camera.width, camera.height);
+        this.uiCamera.setZoom(1);
     }
 
     createHUD() {
         this.hud = new HUD(this, this.timeSystem, this.gameState);
         this.hud.create();
+
+        // Le monde n'apparaît que sur la caméra principale ;
+        // le HUD n'apparaît que sur la caméra UI.
+        this.cameras.main.ignore(this.hud.getChildren());
+        if (this.uiCamera) {
+            this.uiCamera.ignore(this.worldMap.layer);
+        }
     }
 
     setupInput() {
@@ -160,11 +173,22 @@ export class Game extends Phaser.Scene {
 
     handleResize() {
         // Reconfigurer la caméra après resize
-        this.setupCamera();
+        const camera = this.cameras.main;
+        camera.setBounds(
+            0,
+            0,
+            GAME_CONFIG.MAP_WIDTH * GAME_CONFIG.TILE_SIZE,
+            GAME_CONFIG.MAP_HEIGHT * GAME_CONFIG.TILE_SIZE,
+        );
+
+        // Redimensionner la caméra UI
+        if (this.uiCamera) {
+            this.uiCamera.setSize(camera.width, camera.height);
+        }
 
         // Mettre à jour le HUD
         if (this.hud) {
-            this.hud.resize(this.cameras.main.width, this.cameras.main.height);
+            this.hud.resize(camera.width, camera.height);
         }
     }
 

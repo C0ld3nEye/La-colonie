@@ -33,8 +33,9 @@ export class CameraController {
     setupInput() {
         const input = this.scene.input;
 
-        // Désactiver les comportements par défaut
-        input.setDefaultCursor('none');
+        // Activer un second pointeur pour le pinch à deux doigts
+        // (par défaut un seul pointeur tactile est actif)
+        input.addPointer(1);
 
         // Événements tactiles
         input.on('pointerdown', this.onPointerDown.bind(this));
@@ -65,12 +66,25 @@ export class CameraController {
             };
         } else if (this.touchIds.length === 2) {
             // Début du pinch
-            const pointers = this.scene.input.pointers.filter(p => this.touchIds.includes(p.id));
-            this.initialDistance = Phaser.Math.Distance.Between(
-                pointers[0].x, pointers[0].y,
-                pointers[1].x, pointers[1].y,
-            );
+            const pointers = this.getActivePointers();
+            if (pointers.length === 2) {
+                this.initialDistance = Phaser.Math.Distance.Between(
+                    pointers[0].x, pointers[0].y,
+                    pointers[1].x, pointers[1].y,
+                );
+            }
         }
+    }
+
+    /**
+     * Récupère les pointeurs actifs suivis (API Phaser 3.80 :
+     * les pointeurs vivent dans input.manager.pointers, pas input.pointers)
+     */
+    getActivePointers() {
+        const pointers = this.scene.input.manager
+            ? this.scene.input.manager.pointers
+            : [];
+        return pointers.filter(p => this.touchIds.includes(p.id));
     }
 
     /**
@@ -79,7 +93,7 @@ export class CameraController {
     onPointerMove(pointer) {
         if (!this.touchIds.includes(pointer.id)) return;
 
-        const pointers = this.scene.input.pointers.filter(p => this.touchIds.includes(p.id));
+        const pointers = this.getActivePointers();
 
         if (pointers.length === 1 && this.isDragging) {
             // Drag simple
@@ -91,7 +105,7 @@ export class CameraController {
 
             // Limiter la caméra aux bords de la carte
             this.clampCamera();
-        } else if (pointers.length === 2) {
+        } else if (pointers.length === 2 && this.initialDistance > 0) {
             // Pinch pour zoom
             const currentDistance = Phaser.Math.Distance.Between(
                 pointers[0].x, pointers[0].y,

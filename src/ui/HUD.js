@@ -41,9 +41,34 @@ export class HUD {
     }
 
     makeFixed(obj, depth) {
-        obj.setScrollFactor(0);
         obj.setDepth(depth);
         return obj;
+    }
+
+    getChildren() {
+        const objs = [
+            this.topBarBg,
+            this.bottomBarBg,
+            this.dateText,
+            this.speedText,
+            this.pauseButton,
+            this.menuButton,
+        ];
+        this.speedButtons.forEach(b => objs.push(b));
+        if (this.saveButton) objs.push(this.saveButton);
+        if (this.loadButton) objs.push(this.loadButton);
+        const buttons = [
+            this.pauseButton,
+            this.saveButton,
+            this.loadButton,
+            this.menuButton,
+            ...this.speedButtons,
+        ];
+        buttons.forEach(b => {
+            if (b && b.hudText) objs.push(b.hudText);
+        });
+        this.notifications.forEach(n => objs.push(n.bg, n.text));
+        return objs.filter(o => o);
     }
 
     create() {

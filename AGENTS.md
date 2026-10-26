@@ -58,6 +58,14 @@
 - **Critères couverts** : Tous les critères de la Phase 0 sont testés automatiquement
 - **Notes / blocages** : Aucun blocage actuel
 
+### Maintenance du 25-26 octobre 2026 — « jeu non fonctionnel » : ✅ RÉSOLU (PR #1 + #2 mergés)
+- Corrigé : `child.willRender is not a function` (Group ajouté à la DisplayList) → carte rendue en une seule texture canvas (1 Game Object au lieu de ~16 000)
+- Corrigé : textes superposés (HUD sans `setScrollFactor(0)`, `resize()` vide) → UI fixe + resize complet
+- Corrigé : pause ignorée (`gameSpeed || this.speed` écrasait 0) ; import `Phaser` manquant et `input.pointers` inexistant (Phaser 3.80 : `input.manager.pointers`) dans CameraController
+- Corrigé : TitleScene illisible → textes Phaser natifs ; fuite listener resize → nettoyage au shutdown
+- Tests e2e réécrits : pilotent le jeu via `window.__GAME__` (l'ancienne version cherchait du texte DOM inexistant — voir JOURNAL.md)
+- `validate.sh` : 26/26 verts. Tests Playwright à lancer en local (libs système requises).
+
 ### Phases 1 à 7 : ⏳ EN ATTENTE
 | Phase | Contenu | Statut |
 |---|---|---|
@@ -77,4 +85,4 @@
 2. **Travailler** : rituel de phase complet du protocole autonome (tests d'abord → implémentation → `validate.sh` vert en ≤ 10 itérations → auto-revue → invariants).
 3. **Fin** : commit git → mettre à jour `STATUS.md` + `JOURNAL.md` + la section « Suivi d'avancement » ci-dessus.
 
-*Fichier créé par Loric avec l'aide de son assistant, le 24 octobre 2026. Dernière mise à jour : 24 octobre 2026.*
+*Fichier créé par Loric avec l'aide de son assistant, le 24 octobre 2026. Dernière mise à jour : 26 octobre 2026.*

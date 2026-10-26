@@ -128,6 +128,27 @@
 
 ---
 
+## 🔧 MAINTENANCE — Session du 25-26 octobre 2026 : « jeu non fonctionnel »
+
+**Statut : ✅ RÉSOLU** (PR #1 + PR #2 mergés dans main)
+
+### Problèmes corrigés
+- `child.willRender is not a function` — `WorldMap.render()` ajoutait un `Phaser.Group` (pas un Game Object) à la DisplayList + ~16 000 rectangles par carte. La carte est désormais **une seule texture canvas** (1 Game Object).
+- Textes superposés — le HUD n'avait pas `setScrollFactor(0)` : il paniquait avec la caméra. Tous les éléments UI sont fixes + `resize()` complet.
+- Pause inopérante — `TimeSystem.update()` écrasait la vitesse 0 via `|| this.speed`.
+- Crash au drag/zoom — `CameraController` : `Phaser` non importé, puis `input.pointers` inexistant (API Phaser 3.80 : `input.manager.pointers`) ; `addPointer(1)` ajouté pour le pinch tactile ; garde-fou division par zéro sur `initialDistance`.
+- TitleScene illisible — police pixel dessinée à la main remplacée par des textes Phaser natifs, layout proportionnel + resize.
+- Fuite de listener resize entre menu/jeu — nettoyage au shutdown de Game.
+
+### Tests e2e réécrits (justification dans JOURNAL.md)
+Les anciens tests Playwright cherchaient du texte DOM alors que Phaser rend dans le canvas — structurellement impossibles. Ils pilotent désormais le jeu réel via `window.__GAME__` (exposé dans `main.js`), helpers dans `tests/helpers.js`.
+
+### Validation
+- `npm run validate` : 26/26 verts (lint, 15 tests unitaires, charge, build).
+- ⚠️ Les tests Playwright exigent des libs système (libglib, etc.) — à exécuter sur machine locale : `npx playwright test --project=chromium`.
+
+---
+
 ## 🔄 RITUEL DE PHASE
 
 À exécuter quand *« Passe à la phase suivante »* est reçu :
@@ -142,4 +163,4 @@
 
 ---
 
-*Dernière mise à jour : 24 octobre 2026*
+*Dernière mise à jour : 26 octobre 2026*

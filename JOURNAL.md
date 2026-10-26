@@ -133,7 +133,7 @@ la-colonie/
 
 ---
 
-*Dernière mise à jour : 24 octobre 2026*
+*Dernière mise à jour : 26 octobre 2026*
 
 ---
 
@@ -163,3 +163,22 @@ Les anciens tests Playwright vérifiaient du texte DOM qui n'existe pas (Phaser 
 ### Validation
 - `npm run validate` : 26/26 verts (lint, unit, load, build).
 - Les tests Playwright nécessitent les libs système (absentes de cette sandbox) — à exécuter sur machine avec `npx playwright test --project=chromium`.
+
+
+---
+
+## Session du 26 octobre 2026 — Correctif CameraController + clôture
+
+### Problème
+`Uncaught TypeError: Cannot read properties of undefined (reading 'filter')` dans `CameraController.onPointerMove` — `input.pointers` n'existe pas en Phaser 3.80 (c'est `input.manager.pointers`).
+
+### Corrections (PR #2, mergé)
+- `getActivePointers()` lit `input.manager.pointers` (avec garde-fou).
+- `input.addPointer(1)` : sans second pointeur actif, le pinch à deux doigts ne peut pas fonctionner.
+- Pinch ignoré si `initialDistance` = 0 (évite zoom Infinity/NaN).
+
+### Résolution de la confusion de merge
+PR #1 mergé par l'utilisateur AVANT le push du fix CameraController → le commit était resté sur la branche. PR #2 ouvert puis mergé : `main` contient désormais 100 % des corrections. Vérifié : le jeu charge, la carte est accessible, plus d'erreurs console signalées par l'utilisateur.
+
+### Validation
+- ESLint, 15 tests Vitest, `npm run build` : verts.
